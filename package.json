@@ -1,0 +1,25 @@
+{
+  "name": "bluff-with-friends",
+  "version": "1.2.0",
+  "private": true,
+  "type": "module",
+  "description": "Two-mode multiplayer bluffing party game with an original offline question bank",
+  "engines": {
+    "node": ">=22"
+  },
+  "scripts": {
+    "dev": "vite --host 0.0.0.0",
+    "build": "vite build",
+    "start": "node server.js",
+    "test": "node --test",
+    "bank:check": "node scripts/check-bank.js"
+  },
+  "dependencies": {
+    "express": "^4.21.2",
+    "react": "^19.2.0",
+    "react-dom": "^19.2.0"
+  },
+  "devDependencies": {
+    "vite": "^6.1.0"
+  }
+}

@@ -1,0 +1,34 @@
+{
+  "source": "https://github.com/uberspot/OpenTriviaQA",
+  "commit": "dcc1cdf36c2985ed5c849d1f2265c5041ffcdfb9",
+  "license": "CC BY-SA 4.0",
+  "inputQuestions": 43549,
+  "included": 20129,
+  "excluded": {
+    "unsuitable_prompt": 21056,
+    "unsuitable_answer": 1423,
+    "short_decoy_pool": 918,
+    "duplicate": 22
+  },
+  "conflictingPromptsExcluded": 1,
+  "categories": {
+    "Animals": 484,
+    "Celebrities": 1415,
+    "Entertainment": 158,
+    "General": 1628,
+    "Geography": 423,
+    "History": 656,
+    "Hobbies": 481,
+    "Humanities": 504,
+    "Literature": 596,
+    "Movies": 2381,
+    "Music": 2236,
+    "People": 952,
+    "Religion Faith": 304,
+    "Science Technology": 1017,
+    "Sports": 1376,
+    "Television": 3052,
+    "Video Games": 269,
+    "World": 2197
+  }
+}
