@@ -12,4 +12,4 @@ The community JSON and adaptations to that dataset are distributed under the sam
 
 No endorsement by the original authors is implied. Community answers have not all been independently verified. Keep this attribution, source links, change notice, and license with any redistributed version of this data.
 
-`trivia.js` contains separately authored starter questions with per-entry references. `funny.js` and `remixes.js` contain original creative prompts and building blocks; they were not imported from OpenTriviaQA. This notice concerns the community dataset, not unrelated application code.
+`trivia.js` contains separately authored starter questions with per-entry references. `funny.js`, `friends.js`, `search.js`, and `remixes.js` contain original creative prompts and building blocks; they were not imported from OpenTriviaQA. This notice concerns the community dataset, not unrelated application code.

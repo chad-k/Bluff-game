@@ -1,9 +1,9 @@
 {
   "name": "bluff-with-friends",
-  "version": "1.2.0",
+  "version": "1.4.0",
   "private": true,
   "type": "module",
-  "description": "Two-mode multiplayer bluffing party game with an original offline question bank",
+  "description": "Four-mode multiplayer party game: trivia, funny prompts, friends, and fictional search history",
   "engines": {
     "node": ">=22"
   },

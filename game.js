@@ -5,12 +5,21 @@ import {makeDecoy,botVote} from './bots.js';
 const between=g=>['lobby','reveal','finished'].includes(g.phase);
 const log=(g,text)=>{g.log=[...g.log.slice(-39),text];};
 function player(id,name,avatar='fox',bot=false){return {id,name:String(name).trim().slice(0,24)||'Player',avatar:validAvatar(avatar)?avatar:'fox',bot,score:0,lastPoints:0,correct:0,fooled:0,votesReceived:0};}
-export function create(id,name,avatar){return {host:id,players:[player(id,name,avatar)],settings:{mode:'mixed',rounds:8,seconds:60,pack:'mixed',funnyPack:'mixed'},phase:'lobby',round:0,deadline:null,question:null,mode:null,used:[],answers:{},votes:{},options:[],roundPlayers:[],log:['Table opened. Add friends or practice bots.'],result:null};}
+export function create(id,name,avatar){return {host:id,players:[player(id,name,avatar)],settings:{mode:'party',rounds:8,seconds:60,pack:'mixed',funnyPack:'mixed'},phase:'lobby',round:0,deadline:null,question:null,mode:null,featuredPlayer:null,friendTurns:{},searchTurns:{},lastFeaturedByMode:{},lastFeatured:null,used:[],answers:{},votes:{},options:[],roundPlayers:[],log:['Table opened. Add friends or practice bots.'],result:null};}
 function shuffle(a){for(let i=a.length-1;i>0;i--){const j=randomInt(i+1);[a[i],a[j]]=[a[j],a[i]];}return a;}
 export function startRound(g,now,questionOverride){
- g.round++;g.mode=g.settings.mode==='mixed'?(g.round%2?'trivia':'funny'):g.settings.mode;
- g.question=questionOverride||pickQuestion(g.mode,g.settings.pack,g.used,g.players,g.settings.funnyPack);g.used=g.used.filter(id=>id!==g.question.id);g.used.push(g.question.id);g.answers={};g.votes={};g.options=[];g.result=null;g.roundPlayers=g.players.map(p=>p.id);g.players.forEach(p=>p.lastPoints=0);g.phase='writing';g.deadline=g.settings.seconds?now+g.settings.seconds*1000:null;
- log(g,`Round ${g.round}: ${g.mode==='trivia'?'Find the truth':'Make them laugh'}.`);
+ g.round++;g.mode=g.settings.mode==='party'?['trivia','funny','friends','search'][(g.round-1)%4]:g.settings.mode==='trio'?['trivia','funny','friends'][(g.round-1)%3]:g.settings.mode==='mixed'?(g.round%2?'trivia':'funny'):g.settings.mode;
+ g.featuredPlayer=null;
+ if(g.mode==='friends'||g.mode==='search'){
+  const humans=g.players.filter(p=>!p.bot);if(!humans.length)throw Error('This mode needs a human player.');
+  const turns=g.mode==='search'?g.searchTurns:g.friendTurns;
+  const previous=g.lastFeaturedByMode[g.mode];const eligible=humans.length>1?humans.filter(p=>p.id!==previous):humans;
+  const least=Math.min(...eligible.map(p=>turns[p.id]||0));let candidates=eligible.filter(p=>(turns[p.id]||0)===least);
+  const fresh=candidates.filter(p=>p.id!==g.lastFeatured);if(fresh.length)candidates=fresh;
+  const target=candidates[randomInt(candidates.length)];g.featuredPlayer={id:target.id,name:target.name,avatar:target.avatar};turns[target.id]=(turns[target.id]||0)+1;g.lastFeaturedByMode[g.mode]=target.id;g.lastFeatured=target.id;
+ }
+ g.question=questionOverride||pickQuestion(g.mode,g.settings.pack,g.used,g.featuredPlayer?[g.featuredPlayer]:g.players,g.settings.funnyPack);g.used=g.used.filter(id=>id!==g.question.id);g.used.push(g.question.id);g.answers={};g.votes={};g.options=[];g.result=null;g.roundPlayers=g.players.map(p=>p.id);g.players.forEach(p=>p.lastPoints=0);g.phase='writing';g.deadline=g.settings.seconds?now+g.settings.seconds*1000:null;
+ log(g,`Round ${g.round}: ${g.mode==='trivia'?'Find the truth':g.mode==='friends'?'About your friends — '+g.featuredPlayer.name:g.mode==='search'?'Search history — '+g.featuredPlayer.name:'Make them laugh'}.`);
  if(g.question.recycled)log(g,'This selected pack has been used up; questions may repeat.');
  for(const p of g.players.filter(p=>p.bot)){const text=makeDecoy(g.question,g.mode,Object.values(g.answers).map(a=>a.text));g.answers[p.id]={text,correct:false};}
  progress(g,now);
@@ -53,7 +62,7 @@ export function update(g,id,action,data={},now=Date.now()){
  if(action==='avatar'){if(!validAvatar(data.avatar))throw Error('Choose an available avatar.');me.avatar=data.avatar;return;}
  if(action==='settings'){
   if(!between(g))throw Error('Change settings between rounds.');
-  const s={...g.settings,...data.settings};if(!['trivia','funny','mixed'].includes(s.mode)||![5,8,10,15,20].includes(s.rounds)||![0,30,60,90,120].includes(s.seconds)||!['facts','words','community','mixed'].includes(s.pack)||!['mixed','original','remix'].includes(s.funnyPack))throw Error('Invalid table settings.');
+  const s={...g.settings,...data.settings};if(!['trivia','funny','friends','search','mixed','trio','party'].includes(s.mode)||![5,8,10,15,20].includes(s.rounds)||![0,30,60,90,120].includes(s.seconds)||!['facts','words','community','mixed'].includes(s.pack)||!['mixed','original','remix'].includes(s.funnyPack))throw Error('Invalid table settings.');
   if(g.phase==='reveal'&&s.rounds<g.round)throw Error('Round limit cannot be lower than completed rounds.');g.settings=s;return;
  }
  if(action==='bot'){if(!between(g)||g.players.length>=10)throw Error('Add bots between rounds, up to ten total players.');const names=['Milo','Luna','Rex','Nova','Ace','Pip','Ziggy','Cleo','Otto'];const name=names.find(n=>!g.players.some(p=>p.name===n))||'Bot';const icons=['robot','owl','shark','alien','dragon','panda','penguin','cat','wolf'];g.players.push(player('bot-'+randomUUID(),name,icons[names.indexOf(name)]||'robot',true));return;}
@@ -71,7 +80,7 @@ export function update(g,id,action,data={},now=Date.now()){
  throw Error('Unknown action.');
 }
 export function view(g,id){
- const me=g.players.find(p=>p.id===id);return {host:g.host,players:g.players,settings:g.settings,phase:g.phase,round:g.round,mode:g.mode,deadline:g.deadline,question:g.question?{id:g.question.id,question:g.question.question,category:g.question.category}:null,
+ const me=g.players.find(p=>p.id===id);return {host:g.host,players:g.players,settings:g.settings,phase:g.phase,round:g.round,mode:g.mode,featuredPlayer:g.featuredPlayer,deadline:g.deadline,question:g.question?{id:g.question.id,question:g.question.question,category:g.question.category}:null,
   answerCount:Object.keys(g.answers).length,playerCount:g.roundPlayers.length,voteCount:Object.keys(g.votes).length,voterCount:g.phase==='voting'?eligibleVoters(g).length:0,
   submitted:!!g.answers[id],myAnswer:g.answers[id]?.text||'',knewAnswer:!!g.answers[id]?.correct,voted:!!g.votes[id],myVote:g.votes[id]||null,
   canVote:g.phase==='voting'&&eligibleVoters(g).includes(id)&&!g.votes[id],isMember:!!me,

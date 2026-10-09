@@ -1,6 +1,6 @@
 # Bluff with friends — GitHub + Render
 
-An independent two-mode bluffing party game for 2–10 players, with avatars, scores, table chat, phase timers, and practice bots. No account, API key, paid AI service, or database is needed.
+An independent four-mode bluffing party game for 2–10 players, with avatars, scores, table chat, phase timers, and practice bots. No account, API key, paid AI service, or database is needed.
 
 ## What is in the question bank?
 
@@ -11,9 +11,11 @@ An independent two-mode bluffing party game for 2–10 players, with avatars, sc
 | Strange words | 24 | Dictionary-based meanings |
 | Original funny prompts | 300 | Fully written prompts, including ones about players |
 | Funny scenario remixes | 2,000 | 100 fictional settings × 20 writing tasks |
-| Total playable entries | 22,473 | Includes the separately counted remix combinations |
+| About your friends | 500 | Original questions about the human players at the table |
+| Search history | 500 | Individually written fictional situations across ten themes |
+| Total playable entries | 23,473 | Includes the separately counted remix combinations |
 
-Version 1.2 expands replayability. There are **20,173 trivia questions**; this is not a claim of 100,000 researched facts. Trivia subjects rotate to give small categories a fair turn. Funny mode mixes written prompts and scenario remixes, avoiding settings used in the last 20 rounds and formats used in the last six when alternatives are available. The host can select originals only or remixes only.
+Version 1.4 adds Search History as a fourth mode and expands About Your Friends to 500 prompts. There are **20,173 trivia questions**; this is not a claim of 100,000 researched facts. Trivia subjects rotate to give small categories a fair turn. Funny mode mixes written prompts and scenario remixes, avoiding settings used in the last 20 rounds and formats used in the last six when alternatives are available. The host can select originals only or remixes only.
 
 Community trivia comes from **OpenTriviaQA by uberspot and contributors**, licensed CC BY-SA 4.0. The imported pack was deduplicated, reformatted, and automatically filtered for standalone bluffing play. Filters remove true/false items, many option-dependent questions, changing-fact wording, malformed records, and conflicting duplicate answers. It is a community-supplied bank, **not 20,129 independently fact-checked answers**. Some errors, dated facts, or obscure references may remain. Its reveal links show the dataset source rather than a separately researched reference. See `data/ATTRIBUTION.md`, the included license, and `data/community-manifest.json` for provenance and filtering counts.
 
@@ -69,9 +71,31 @@ Everyone writes an answer to the same funny prompt. Vote for your favourite. The
 
 Both modes merge identical normalized answers. When a merged answer receives an eligible vote, every co-author receives the full 100 points. Co-authors cannot vote for that answer. Authors, votes, and the real trivia answer are revealed after voting ends. Scores are updated once per round.
 
+### About your friends — Put someone in the spotlight
+
+Each round names an actual human player at your table. Examples include “What would Chad accidentally become famous for?” and “What would Chad’s personal warning label say?” The 500 prompts focus on personalities, habits, and playful observations; they are original prompts, not copied from Psych.
+
+Everyone writes an answer, **including the featured player**. Everyone can then vote for someone else’s funniest or most fitting answer. Each vote gives its author **100 points**. There is no official correct answer or truth bonus. Authors remain hidden until the reveal, and duplicate answers merge as in Funny mode.
+
+The featured player’s name and avatar appear in a spotlight panel. The server rotates among human players, favouring those featured least and avoiding consecutive turns for the same person when possible. Joining/leaving players are accounted for at the next round. Bots can write scripted practice answers and vote, but never become the featured friend. With one human and bots, that human is featured each time; the bots do not know personal facts about them. Spotlight counts last for the table’s lifetime and are tracked independently for Friends and Search History. Question IDs use the existing browser repeat history; changing the name does not inflate the prompt count.
+
+Choose **About your friends** to play only this mode, **Trivia + funny** for the original two-mode rotation, or **Trivia + funny + friends** for the three-mode rotation, or **All four modes** to rotate trivia → funny → friends → search history. The default for new tables is all four. Trivia and Funny pack selectors are disabled when they do not apply.
+
+### Search history — Invent their next query
+
+A fictional situation names one of the human players: for example, “Chad accidentally makes enough pasta for twenty people. What would they search?” Everyone, including Chad, invents a funny search query. Answers appear anonymously; vote for the funniest or most fitting one. Each vote gives its author **100 points**, and nobody can vote for their own query. There is no official answer or truth bonus.
+
+This is an imagination game. **It never reads, retrieves, or reveals real browser search history.** The only browser history stored by the app is the separate list of played question IDs used to avoid repeated game prompts.
+
+The 500 situations cover ten themes, with 50 individually written situations in each: Kitchen chaos, Workday mysteries, Travel trouble, Domestic experiments, Digital dilemmas, Social situations, Shopping and hobbies, Games and exercise, Animals and outdoors, and Ridiculous what-ifs. These are distinct setups rather than a Cartesian product of interchangeable names or numbers. Player substitutions do not inflate the count.
+
+Human players rotate independently within Friends and Search History, so everyone gets turns in both. The app also favours a different person from the last spotlight when fairness allows. Bots provide scripted fictional queries and random legal votes, and never become the featured player. Solo practice with bots features the one human each time.
+
+Select **Search history** for this mode alone or **All four modes** to include it in the rotation. The earlier two- and three-mode rotations remain available. Existing chat, avatars, timers, scoring, duplicate merging, and browser-based repeat avoidance still apply.
+
 ### Rounds, timers, and chat
 
-The host chooses trivia, funny prompts, or alternating rounds; 5, 8, 10, 15, or 20 rounds; and 30, 60, 90, or 120 seconds per phase (or Off). The default is both modes, eight rounds, and 60 seconds each for writing and voting.
+The host chooses an individual mode, the two- or three-mode mix, or all four; 5, 8, 10, 15, or 20 rounds; and 30, 60, 90, or 120 seconds per phase (or Off). The default is all four modes, eight rounds, and 60 seconds each for writing and voting.
 
 All players write simultaneously and then vote simultaneously. A phase advances as soon as everyone eligible has submitted, or at the deadline. The server skips missing answers/votes at timeout, even when a browser disconnects. The host can also close a phase early. Chatting, refreshing, and changing avatars do not restart the timer. Settings and seats can be changed between rounds. A player arriving during a round must wait for the reveal to join.
 
@@ -102,9 +126,9 @@ npm test
 npm run bank:check
 ```
 
-Tests cover scoring, secrecy, duplicates, known-answer handling, both modes, simultaneous players, deadlines, late actions, bots, and table chat. The bank checker verifies unique IDs and prompt text, source URLs, and valid bot answers for all trivia entries. Tests cover full tables, exhaustion, remix variety, source secrecy, browser-history ingestion, and both funny packs. These are code/data-structure checks, not independent factual verification.
+Tests cover scoring, secrecy, duplicates, known-answer handling, all four modes, simultaneous players, deadlines, late actions, bots, and table chat. The bank checker verifies unique IDs and prompt text, source URLs, and valid bot answers for all trivia entries. Tests cover full tables, exhaustion, remix variety, source secrecy, browser-history ingestion, both funny packs, featured-player rotation, friends/search scoring, separate spotlight rotation, and two-/three-/four-mode sequencing. These are code/data-structure checks, not independent factual verification.
 
-Edit `data/trivia.js` or `data/funny.js` to extend the bank. A trivia entry needs a unique ID and question, `pack` (`words` or `facts`), category, answer, explanation, HTTPS source URL, and at least three distinct incorrect decoys (nine is better for large bot tables). Optional `aliases` list accepted answers. Check each fact and avoid ambiguous questions. Run the checker after changes; displayed counts are calculated from the files.
+Edit `data/trivia.js`, `data/funny.js`, `data/friends.js`, or `data/search.js` to extend the bank. A trivia entry needs a unique ID and question, `pack` (`words` or `facts`), category, answer, explanation, HTTPS source URL, and at least three distinct incorrect decoys (nine is better for large bot tables). Optional `aliases` list accepted answers. Check each fact and avoid ambiguous questions. Run the checker after changes; displayed counts are calculated from the files.
 
 Correct-answer bonuses match normalized spelling and listed aliases, not arbitrary synonymous definitions. Bots use only the authored decoys; their votes remain random and do not inspect the correct-answer flag. No external AI is used.
 
